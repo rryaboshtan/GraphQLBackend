@@ -1,6 +1,6 @@
 import { MyContext } from 'src/types';
 import { Arg, Ctx, Field, InputType, Mutation, Resolver } from 'type-graphql';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 
 import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
 import { Int, ObjectType } from 'type-graphql';
@@ -92,12 +92,12 @@ export class UserResolver {
       // user.createdAt = 23;
       // user.createdAt = Date.now();
       // user.updatedAt = new Date(2022, 4, 12, 1, 23, 23);
-      user.id = 3;
+      user.id = 5;
       try {
          await em.persistAndFlush(user);
       } catch (err) {
          console.error('message: ', err.code);
-         if (err.code === '23505') {
+         if (Number(err.code) === 23505) {
             return {
                errors: [
                   {
@@ -106,7 +106,8 @@ export class UserResolver {
                   },
                ],
             };
-         } //|| err.details.includes('already exists'))
+         }
+         //|| err.details.includes('already exists'))
          // return {
          //    errors: [
          //       {
