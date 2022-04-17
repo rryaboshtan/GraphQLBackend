@@ -1,7 +1,5 @@
 import { Connection, IDatabaseDriver, EntityManager } from '@mikro-orm/core';
-import { EntityRepository } from '@mikro-orm/postgresql';
-import { Post } from './entities/Post';
-import { Request, Response, Express } from 'express';
+import { Request, Response } from 'express';
 // import { EntityManager } from "@mikro-orm/postgresql"
 
 export type MyContext = {
