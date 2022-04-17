@@ -120,7 +120,7 @@ export class UserResolver {
       return { user };
    }
    @Mutation(() => UserResponse)
-   async login(@Arg('options') options: UsernamePasswordInput, @Ctx() { em }: MyContext): Promise<UserResponse> {
+   async login(@Arg('options') options: UsernamePasswordInput, @Ctx() { em, req }: MyContext): Promise<UserResponse> {
       // const hashedPassword = await bcrypt.hash(options.password, 7);
       // const user = em.create(User, new User());
       // user.username = options.username;
@@ -155,6 +155,8 @@ export class UserResolver {
             ],
          };
       }
+      req.userId = user.id;
+
       return { user };
    }
 }
