@@ -62,8 +62,28 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
-   @Mutation(() => User)
-   async register(@Arg('options') options: UsernamePasswordInput, @Ctx() { em }: MyContext) {
+   @Mutation(() => UserResponse)
+   async register(@Arg('options') options: UsernamePasswordInput, @Ctx() { em }: MyContext): Promise<UserResponse> {
+      if (options.username.length <= 2) {
+         return {
+            errors: [
+               {
+                  field: 'username',
+                  message: 'length must be greater than 2',
+               },
+            ],
+         };
+      }
+      if (options.password.length <= 2) {
+         return {
+            errors: [
+               {
+                  field: 'password',
+                  message: 'length must be greater than 2',
+               },
+            ],
+         };
+      }
       const hashedPassword = await bcrypt.hash(options.password, 7);
       const user = em.create(User, new User());
       user.username = options.username;
@@ -72,9 +92,31 @@ export class UserResolver {
       // user.createdAt = 23;
       // user.createdAt = Date.now();
       // user.updatedAt = new Date(2022, 4, 12, 1, 23, 23);
-      user.id = 7;
-      await em.persistAndFlush(user);
-      return user;
+      user.id = 3;
+      try {
+         await em.persistAndFlush(user);
+      } catch (err) {
+         console.error('message: ', err.code);
+         if (err.code === '23505') {
+            return {
+               errors: [
+                  {
+                     field: 'username',
+                     message: 'username already taken',
+                  },
+               ],
+            };
+         } //|| err.details.includes('already exists'))
+         // return {
+         //    errors: [
+         //       {
+         //          field: 'username',
+         //          message: 'duplicate username',
+         //       },
+         //    ],
+         // };
+      }
+      return { user };
    }
    @Mutation(() => UserResponse)
    async login(@Arg('options') options: UsernamePasswordInput, @Ctx() { em }: MyContext): Promise<UserResponse> {
@@ -99,7 +141,9 @@ export class UserResolver {
       // user.updatedAt = new Date(2022, 4, 12, 1, 23, 23);
       // user.id = 7;
       // await em.persistAndFlush(user);
-      const valid = await bcrypt.compare(options.username, user.password);
+      console.log(user.password);
+      console.log(options.username);
+      const valid = bcrypt.compareSync(options.username, user.password);
       if (!valid) {
          return {
             errors: [
